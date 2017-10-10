@@ -26,11 +26,15 @@ Ci_eq = @(T) c.Cstar*exp(-c.dH_0/(c.R*T));
 C_i=Ci_eq(v.T_iso);
 
 t=[0.5,1,2,3]*60*60; %hours
+
+x=linspace(c.B0,10^-5,100); 
+
 xgrid=100;
 xend=10^-4;
 x=linspace(c.B0,xend,xgrid); 
 dt=100; %time step
 dx=x(2)-x(1); %distance step
+
 
 %Analytic solution
 C_an_eq = @(x,t) C_i-(C_i - v.C_0).*erf((x-c.B0)./(2*sqrt(D_T*t)));
@@ -39,11 +43,11 @@ for i=1:length(t)
 end
 figure
 hold on
-plot(x,C_an)
+plot(x,C_an*100)
 grid
 title('Concentration profile')
 xlabel('Position [µm]')
-ylabel('Composition B')
+ylabel('% B')
 leg = strtrim(cellstr(num2str((t./(60^2))'))');
 legend(strcat(leg,'  hours'))
 %Numerisk del Eirik
@@ -94,13 +98,13 @@ leg = strtrim(cellstr(num2str((t./(60^2))'))');
 
 %Isokinetic solution iii)b)----------------------------
 
-%k
 %k_eq = @(C_i) 2*(C_i-v.C_0)/(v.C_p-v.C_0);
 
 %B
 %B = @(k) c.B0- (k/sqrt(pi))*sqrt(D_T*t);
 
-%t1star=(pi/D_T(T))*(
-%scaledvolf=1-sqrt(t/t1star);7
+%tr1=(pi/D_T(T))*(c.B0/B0r).^2 
+%t1star=trl*()
+%scaledvolf=1-sqrt(t/t1star);
 
-%lukta sjukt myggsprøy
+
