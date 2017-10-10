@@ -40,4 +40,6 @@ C_an = @(x,t) C_i-(C_i - C_0)*erf((x-c.R)/(2*sqrt(D_T*t)));
 % B = @(k) c.B0- (k/sqrt(pi))*sqrt(D_T*t);
 % 
 % t1star=(pi/D_T(T))*(
-% scaledvolf=1-sqrt(t/t1star);
+% scaledvolf=1-sqrt(t/t1star);7
+
+%Deojagr 
