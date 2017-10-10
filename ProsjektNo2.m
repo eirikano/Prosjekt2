@@ -28,7 +28,7 @@ C_i=Ci_eq(v.T_iso);
 t=[0.5,1,2,3]*60*60; %hours
 
 x=linspace(c.B0,10^-5,100); 
-=======
+
 xgrid=100;
 xend=10^-4;
 x=linspace(c.B0,xend,xgrid); 
@@ -98,13 +98,13 @@ leg = strtrim(cellstr(num2str((t./(60^2))'))');
 
 %Isokinetic solution iii)b)----------------------------
 
-k_eq = @(C_i) 2*(C_i-v.C_0)/(v.C_p-v.C_0);
+%k_eq = @(C_i) 2*(C_i-v.C_0)/(v.C_p-v.C_0);
 
 %B
-B = @(k) c.B0- (k/sqrt(pi))*sqrt(D_T*t);
+%B = @(k) c.B0- (k/sqrt(pi))*sqrt(D_T*t);
 
-tr1=(pi/D_T(T))*(c.B0/B0r).^2 
-t1star=trl*()
-scaledvolf=1-sqrt(t/t1star);
+%tr1=(pi/D_T(T))*(c.B0/B0r).^2 
+%t1star=trl*()
+%scaledvolf=1-sqrt(t/t1star);
 
 
