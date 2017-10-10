@@ -46,3 +46,4 @@ C_an = @(x,t) C_i-(C_i - C_0)*erf((x-c.R)/(2*sqrt(D_T*t)));
 =======
 %tobias er kulere enn eirik er teit
 >>>>>>> master
+%fix alt test 
