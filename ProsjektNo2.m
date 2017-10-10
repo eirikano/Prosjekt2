@@ -18,17 +18,23 @@ v.C_0=0;
 %----------------------------------------
 
 %Diffusion
-D_eq = @(T) c.D*exp(-c.Q/(c.R*v.T));  % [mm^2/s]
+D_eq = @(T) c.D*exp(-c.Q/(c.R*T));  % [mm^2/s]
 D_T=D_eq(v.T_iso);
 
 %Ci
 Ci_eq = @(T) c.Cstar*exp(-c.dH_0/(c.R*v.T));
 C_i=Ci_eq(v.T_iso);
 
-
+t=[0.5,1,2,3]*60*60; %hours
+x=linspace(10^-6,10^-5,100); 
 
 %Analytic solution
-C_an = @(x,t) C_i-(C_i - C_0)*erf((x-c.R)/(2*sqrt(D_T*t)));
+C_an_eq = @(x,t) C_i-(C_i - C_0).*erf((x-c.R)./(2*sqrt(D_T*t)));
+for i=1:length(t)
+    C_an(:,i)= C_an_eq(x,t(i));
+end
+
+%Numerisk del Eirik
 
 
 
