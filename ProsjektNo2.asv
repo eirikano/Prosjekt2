@@ -41,11 +41,8 @@ end
 
 dt=0.01; %time step
 dx=10^-6; %distance step
-
-%Boundary conditions (NEEDS TO BE CONFIRMED!)
-C_num(1:length(x),1)=v.C_0;
-C_num(c.B0,1:length(t))=v.C_i;
-
+C_num((1:length(x),1)=v.C_0;
+C_num(c.B0,(1:length(t))=
 
 %Stability
 r=(D_T*dt)/(dx^2);
@@ -63,12 +60,12 @@ end
 %Isokinetic solution iii)b)----------------------------
 
 %k
-%k_eq = @(C_i) 2*(C_i-v.C_0)/(v.C_p-v.C_0);
+k_eq = @(C_i) 2*(C_i-v.C_0)/(v.C_p-v.C_0);
 
 %B
-%B = @(k) c.B0- (k/sqrt(pi))*sqrt(D_T*t);
+B = @(k) c.B0- (k/sqrt(pi))*sqrt(D_T*t);
 
-%t1star=(pi/D_T(T))*(
-%scaledvolf=1-sqrt(t/t1star);7
+t1star=(pi/D_T(T))*(
+scaledvolf=1-sqrt(t/t1star);7
 
 %lukta sjukt myggsprøy
