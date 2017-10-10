@@ -35,11 +35,19 @@ for i=1:length(t)
 end
 figure
 hold on
+<<<<<<< HEAD
 plot(x,C_an*100)
 grid
 title('Concentration profile')
 xlabel('Position [µm]')
 ylabel('% B')
+=======
+plot(x,C_an)
+grid
+title('Concentration profile')
+xlabel('Position [µm]')
+ylabel('Composition B')
+>>>>>>> master
 leg = strtrim(cellstr(num2str((t./(60^2))'))');
 legend(strcat(leg,'  hours'))
 %Numerisk del Eirik
@@ -47,36 +55,76 @@ legend(strcat(leg,'  hours'))
 
 %Initial values
 
+<<<<<<< HEAD
 dt=0.01; %time step
 dx=10^-6; %distance step
 
 %Boundary conditions (NEEDS TO BE CONFIRMED!)
 C_num(1:length(x),1)=v.C_0;
 C_num(c.B0,1:length(t))=v.C_i;
+=======
+xgrid=100;
+xend=10^-5;
+x_num=linspace(c.B0,xend,xgrid); 
+dt=100; %time step
+dx=x_num(2)-x_num(1); %distance step
+t=0;
+
+%Boundary conditions (NEEDS TO BE CONFIRMED!)
+C_num(1:length(x_num),1)=v.C_0;
+C_num(1,1)=C_i;
+
+>>>>>>> master
 
 
 %Stability
 r=(D_T*dt)/(dx^2);
-if r>0.5
-    display('stability error')
+while r>0.5
+    r=(D_T*dt)/(dx^2);
+    dt=dt/2;
 end
 
-for i=1:length(x)
-    for j=1:length(t)
-        C_num(i+1,j)=C(i,j) + r*(C(i+1,j)-2*C(i,j)+C(i-1,j));
+j=1;
+while t<1*60*60 %hours
+    C_num(1,j)=C_i;
+    for i=2:length(x_num)-1
+        C_num(i,j+1)=C_num(i,j) + r*(C_num(i+1,j)-2*C_num(i,j)+C_num(i-1,j));
     end
+    if i==le
+j=j+1;
+t=t+dt;
 end
 
+figure
+plot(x,C_an(:,2))
+hold on
+plot(x,C_num(:,j-1))
+grid
+title('Concentration profile')
+xlabel('Position [µm]')
+ylabel('Composition B')
+leg = strtrim(cellstr(num2str((t./(60^2))'))');
+legend(strcat(leg,'  hours'))
 
 %Isokinetic solution iii)b)----------------------------
 
+<<<<<<< HEAD
 k_eq = @(C_i) 2*(C_i-v.C_0)/(v.C_p-v.C_0);
+=======
+%k
+%k_eq = @(C_i) 2*(C_i-v.C_0)/(v.C_p-v.C_0);
+>>>>>>> master
 
 %B
-B = @(k) c.B0- (k/sqrt(pi))*sqrt(D_T*t);
+%B = @(k) c.B0- (k/sqrt(pi))*sqrt(D_T*t);
 
+<<<<<<< HEAD
 tr1=(pi/D_T(T))*(c.B0/B0r).^2 
 t1star=trl*()
 scaledvolf=1-sqrt(t/t1star);
 
+=======
+%t1star=(pi/D_T(T))*(
+%scaledvolf=1-sqrt(t/t1star);7
+>>>>>>> master
 

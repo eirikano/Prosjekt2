@@ -26,7 +26,15 @@ Ci_eq = @(T) c.Cstar*exp(-c.dH_0/(c.R*T));
 C_i=Ci_eq(v.T_iso);
 
 t=[0.5,1,2,3]*60*60; %hours
+<<<<<<< HEAD
 x=linspace(c.B0,10^-5,100); 
+=======
+xgrid=100;
+xend=10^-4;
+x=linspace(c.B0,xend,xgrid); 
+dt=100; %time step
+dx=x(2)-x(1); %distance step
+>>>>>>> master
 
 %Analytic solution
 C_an_eq = @(x,t) C_i-(C_i - v.C_0).*erf((x-c.B0)./(2*sqrt(D_T*t)));
@@ -47,25 +55,45 @@ legend(strcat(leg,'  hours'))
 
 %Initial values
 
-dt=0.01; %time step
-dx=10^-6; %distance step
+
+t=0;
 
 %Boundary conditions (NEEDS TO BE CONFIRMED!)
 C_num(1:length(x),1)=v.C_0;
-C_num(c.B0,1:length(t))=v.C_i;
+C_num(1,1)=C_i;
+%
 
 
 %Stability
 r=(D_T*dt)/(dx^2);
-if r>0.5
-    display('stability error')
+while r>0.5
+    r=(D_T*dt)/(dx^2);
+    dt=dt/2;
 end
 
-for i=1:length(x)
-    for j=1:length(t)
-        C_num(i+1,j)=C(i,j) + r*(C(i+1,j)-2*C(i,j)+C(i-1,j));
+j=1;
+while t<1*60*60 %hours
+    C_num(1,j)=C_i; %boundary cond.
+    for i=2:length(x)-1
+        C_num(i,j+1)=C_num(i,j) + r*(C_num(i+1,j)-2*C_num(i,j)+C_num(i-1,j));
     end
+    if i==length(x)-1
+        C_num(i+1,j+1)=v.C_0; %boundary cond.
+    end
+j=j+1;
+t=t+dt;
 end
+
+figure
+plot(x,C_an(:,2))
+hold on
+plot(x,C_num(:,j-1))
+grid
+legend('Analytic','Numeric')
+title('Concentration profile')
+xlabel('Position [µm]')
+ylabel('Composition B')
+leg = strtrim(cellstr(num2str((t./(60^2))'))');
 
 
 %Isokinetic solution iii)b)----------------------------
