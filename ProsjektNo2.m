@@ -26,7 +26,7 @@ Ci_eq = @(T) c.Cstar*exp(-c.dH_0/(c.R*T));
 C_i=Ci_eq(v.T_iso);
 
 t=[0.5,1,2,3]*60*60; %hours
-<<<<<<< HEAD
+
 x=linspace(c.B0,10^-5,100); 
 =======
 xgrid=100;
@@ -34,7 +34,7 @@ xend=10^-4;
 x=linspace(c.B0,xend,xgrid); 
 dt=100; %time step
 dx=x(2)-x(1); %distance step
->>>>>>> master
+
 
 %Analytic solution
 C_an_eq = @(x,t) C_i-(C_i - v.C_0).*erf((x-c.B0)./(2*sqrt(D_T*t)));
