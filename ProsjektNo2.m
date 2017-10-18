@@ -148,6 +148,68 @@ hold on
 plot(t,B_num_norm)
 legend('Analytic','Numeric')
 
+
+
+%iii)d)----------------------------
+%Non isothermal case
+v.T2=430+273; %[K]
+v.T1=400+273; %[K]
+
+D_T1=D_eq(v.T1);
+D_T2=D_eq(v.T2);
+
+Ci_T1=Ci_eq(v.T1);
+Ci_T2=Ci_eq(v.T2);
+
+k_T1=k_eq(Ci_T1);
+k_T2=k_eq(Ci_T2);
+
+clear t
+dt=0.001;
+B_num_noniso_1(1)=c.B0;
+B_num_noniso_1_norm(1)=1;
+B_num_noniso_2(1)=c.B0;
+B_num_noniso_2_norm(1)=1;
+
+t(1)=0;
+j=1;
+D_1=D_T1;
+k_1=k_T1;
+D_2=D_T1;
+k_2=k_T1;
+
+while B_num_noniso_2_norm(j)>0
+t(j+1)=t(j)+dt;
+if B_num_noniso_1_norm(j)<0.7
+    D_1=D_T2;
+    k_1=k_T2;
+end
+if B_num_noniso_2_norm(j)<0.3
+    D_2=D_T2;
+    k_2=k_T2;
+end
+%Backwards euler
+    B_num_noniso_1(j+1)=B_num_noniso_1(j)-dt*(k_1/2)*sqrt(D_1/(pi*t(j+1)));
+    B_num_noniso_1_norm(j+1)=B_num_noniso_1(j+1)/c.B0;
+    
+    B_num_noniso_2(j+1)=B_num_noniso_2(j)-dt*(k_2/2)*sqrt(D_2/(pi*t(j+1)));
+    B_num_noniso_2_norm(j+1)=B_num_noniso_2(j+1)/c.B0;
+j=j+1;
+end
+
+subplot(2,2,2)
+plot(t,B_num_noniso_1_norm)
+hold on
+plot(t,B_num_noniso_2_norm)
+axis([0 20 0 1])
+title('Plate dissolution, non-isothermal, 1D')
+ylabel('scaled volume fraction')
+xlabel('time[s]')
+grid
+
+
+
+
 %tr1=(pi/D_T(T))*(c.B0/B0r).^2 
 %t1star=trl*(k)
 %scaledvolf=1-sqrt(t/t1star);
