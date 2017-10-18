@@ -99,13 +99,33 @@ leg = strtrim(cellstr(num2str((t./(60^2))'))');
 
 %Isokinetic solution iii)b)----------------------------
 
-%k_eq = @(C_i) 2*(C_i-v.C_0)/(v.C_p-v.C_0);
+k_eq = @(C_i) 2*(C_i-v.C_0)/(v.C_p-v.C_0);
 
+k=k_eq(C_i);
 %B
-%B = @(k) c.B0- (k/sqrt(pi))*sqrt(D_T*t);
+B_eq = @(k,t) c.B0 - (k/sqrt(pi))*sqrt(D_T*t);
+B_norm(1)=1;
+i=1;
+t(1)=0;
+dt=0.1;
+while B_norm>0
+B_norm(i)= B_eq(k,t(i))/c.B0;
+t(i+1)=t(i)+dt;
+i=i+1;
+end
+
+figure
+plot(t(1:length(t)-1),B_norm)
+
+axis([0 20 0 1])
+title('plate dissolution')
+ylabel('scaled volume fraction')
+xlabel('time[s]')
+
+
 
 %tr1=(pi/D_T(T))*(c.B0/B0r).^2 
-%t1star=trl*()
+%t1star=trl*(k)
 %scaledvolf=1-sqrt(t/t1star);
 
 
