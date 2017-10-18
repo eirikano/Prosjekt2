@@ -148,12 +148,23 @@ hold on
 plot(t,B_num_norm)
 legend('Analytic','Numeric')
 
-%tr1=(pi/D_T(T))*(c.B0/B0r).^2 
-%t1star=trl*(k)
-%scaledvolf=1-sqrt(t/t1star);
+
+
 
 %Isokinetic annealing, analytic solution iii)e)----------------------
 
-f(1)=1;
-t1_star_eq= @(k_r) k_r*c.B0/k/B_0r
-while 
+k_eq = @(C_i) 2*(C_i-v.C_0)/(v.C_p-v.C_0);
+
+k=k_eq(C_i);
+
+B_eq = @(k,t) c.B0 - (k/sqrt(pi))*sqrt(D_T*t);
+B_normE(1)=1;
+i=1;
+t(1)=0;
+dt=0.1;
+while B_normE>0.7
+B_normE(i)= B_eq(k,t(i))/c.B0;
+t(i+1)=t(i)+dt;
+i=i+1;
+end
+
