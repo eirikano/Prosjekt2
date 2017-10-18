@@ -218,18 +218,40 @@ grid
 
 %Isokinetic annealing, analytic solution iii)e)----------------------
 
-k_eq = @(C_i) 2*(C_i-v.C_0)/(v.C_p-v.C_0);
+D_1=D_T1;
+k_1=k_T1;
 
-k=k_eq(C_i);
-
-B_eq = @(k,t) c.B0 - (k/sqrt(pi))*sqrt(D_T*t);
+B_eq = @(k, D,t) c.B0 - (k/sqrt(pi))*sqrt(D*t);
 B_normE(1)=1;
 i=1;
-t(1)=0;
+t=0;
 dt=0.1;
-while B_normE>0.7
-B_normE(i)= B_eq(k,t(i))/c.B0;
+while B_normE>0
+
+B_normE(i)= B_eq(k_1, D_1,t(i))/c.B0;
+if B_normE(i)<0.7
+    D_2=D_T2;
+    k_2=k_T2;
+    B_normE07(i)= B_eq(k_2, D_2,t(i))/c.B0;
+    
+    if B_normE07(i)<= 0
+       B_normE07(i)=NaN;
+    end
+end
+
+if B_normE(i)<0.3
+    D_2=D_T2;
+    k_2=k_T2;
+    B_normE03(i)= B_eq(k_2, D_2,t(i))/c.B0;
+    
+    if B_normE03(i) <= 0
+       B_normE03(i) = NaN;
+    end
+end
 t(i+1)=t(i)+dt;
 i=i+1;
 end
+x1=1:(length(t)-1);
+subplot(2,2,4)
+plot(x1,B_normE, x1,B_normE07, x1,B_normE03)
 
