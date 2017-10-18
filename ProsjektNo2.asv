@@ -26,7 +26,15 @@ Ci_eq = @(T) c.Cstar*exp(-c.dH_0/(c.R*T));
 C_i=Ci_eq(v.T_iso);
 
 t=[0.5,1,2,3]*60*60; %hours
+
 x=linspace(c.B0,10^-5,100); 
+
+xgrid=100;
+xend=10^-4;
+x=linspace(c.B0,xend,xgrid); 
+dt=100; %time step
+dx=x(2)-x(1); %distance step
+
 
 %Analytic solution
 C_an_eq = @(x,t) C_i-(C_i - v.C_0).*erf((x-c.B0)./(2*sqrt(D_T*t)));
@@ -35,19 +43,11 @@ for i=1:length(t)
 end
 figure
 hold on
-<<<<<<< HEAD
 plot(x,C_an*100)
 grid
 title('Concentration profile')
 xlabel('Position [µm]')
 ylabel('% B')
-=======
-plot(x,C_an)
-grid
-title('Concentration profile')
-xlabel('Position [µm]')
-ylabel('Composition B')
->>>>>>> master
 leg = strtrim(cellstr(num2str((t./(60^2))'))');
 legend(strcat(leg,'  hours'))
 %Numerisk del Eirik
@@ -55,26 +55,13 @@ legend(strcat(leg,'  hours'))
 
 %Initial values
 
-<<<<<<< HEAD
-dt=0.01; %time step
-dx=10^-6; %distance step
 
-%Boundary conditions (NEEDS TO BE CONFIRMED!)
-C_num(1:length(x),1)=v.C_0;
-C_num(c.B0,1:length(t))=v.C_i;
-=======
-xgrid=100;
-xend=10^-5;
-x_num=linspace(c.B0,xend,xgrid); 
-dt=100; %time step
-dx=x_num(2)-x_num(1); %distance step
 t=0;
 
 %Boundary conditions (NEEDS TO BE CONFIRMED!)
-C_num(1:length(x_num),1)=v.C_0;
+C_num(1:length(x),1)=v.C_0;
 C_num(1,1)=C_i;
-
->>>>>>> master
+%
 
 
 %Stability
@@ -86,11 +73,13 @@ end
 
 j=1;
 while t<1*60*60 %hours
-    C_num(1,j)=C_i;
-    for i=2:length(x_num)-1
+    C_num(1,j)=C_i; %boundary cond.
+    for i=2:length(x)-1
         C_num(i,j+1)=C_num(i,j) + r*(C_num(i+1,j)-2*C_num(i,j)+C_num(i-1,j));
     end
-    if i==le
+    if i==length(x)-1
+        C_num(i+1,j+1)=v.C_0; %boundary cond.
+    end
 j=j+1;
 t=t+dt;
 end
@@ -100,31 +89,42 @@ plot(x,C_an(:,2))
 hold on
 plot(x,C_num(:,j-1))
 grid
+legend('Analytic','Numeric')
 title('Concentration profile')
 xlabel('Position [µm]')
 ylabel('Composition B')
 leg = strtrim(cellstr(num2str((t./(60^2))'))');
-legend(strcat(leg,'  hours'))
+
 
 %Isokinetic solution iii)b)----------------------------
 
-<<<<<<< HEAD
 k_eq = @(C_i) 2*(C_i-v.C_0)/(v.C_p-v.C_0);
-=======
-%k
-%k_eq = @(C_i) 2*(C_i-v.C_0)/(v.C_p-v.C_0);
->>>>>>> master
 
+k=k_eq(C_i);
 %B
-%B = @(k) c.B0- (k/sqrt(pi))*sqrt(D_T*t);
+B_eq = @(k,t) c.B0 - (k/sqrt(pi))*sqrt(D_T*t);
+B_norm(1)=1;
+i=1;
+t(1)=0;
+dt=0.1;
+while B_norm>0
+B_norm(i)= B_eq(k,t(i))/c.B0;
+t(i+1)=t(i)+dt;
+i=i+1;
+end
 
-<<<<<<< HEAD
-tr1=(pi/D_T(T))*(c.B0/B0r).^2 
-t1star=trl*()
-scaledvolf=1-sqrt(t/t1star);
+figure
+plot(t(1:length(t)-1),B_norm)
 
-=======
-%t1star=(pi/D_T(T))*(
-%scaledvolf=1-sqrt(t/t1star);7
->>>>>>> master
+axis([0 20 0 1])
+title('plate dissolution')
+yaxis('scaled volume fraction')
+xaxis('time[s]')
+
+
+
+%tr1=(pi/D_T(T))*(c.B0/B0r).^2 
+%t1star=trl*(k)
+%scaledvolf=1-sqrt(t/t1star);
+
 
