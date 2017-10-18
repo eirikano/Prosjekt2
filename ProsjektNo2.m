@@ -150,8 +150,7 @@ legend('Analytic','Numeric')
 
 
 
-<<<<<<< HEAD
-=======
+
 %iii)d)----------------------------
 %Non isothermal case
 v.T2=430+273; %[K]
@@ -215,7 +214,7 @@ grid
 %tr1=(pi/D_T(T))*(c.B0/B0r).^2 
 %t1star=trl*(k)
 %scaledvolf=1-sqrt(t/t1star);
->>>>>>> 5e9f7e34c31fb049a03335680fa527e8af5524e2
+
 
 %Isokinetic annealing, analytic solution iii)e)----------------------
 
