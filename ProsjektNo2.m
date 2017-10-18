@@ -27,10 +27,10 @@ C_i=Ci_eq(v.T_iso);
 
 t=[0.5,1,2,3]*60*60; %hours
 
-x=linspace(c.B0,10^-5,100); 
+x=logspace(log(c.B0),-5); 
 
-xgrid=100;
-xend=10^-4;
+xgrid=300;
+xend=10^-3;
 x=linspace(c.B0,xend,xgrid); 
 dt=100; %time step
 dx=x(2)-x(1); %distance step
@@ -43,9 +43,9 @@ for i=1:length(t)
 end
 figure
 hold on
-plot(x,C_an*100)
+plot(x(1:15),C_an(1:15,:)*100)
 grid
-title('Concentration profile')
+title('Concentration profile, analytic 2D')
 xlabel('Position [µm]')
 ylabel('% B')
 leg = strtrim(cellstr(num2str((t./(60^2))'))');
@@ -73,7 +73,7 @@ end
 
 j=1;
 while t<1*60*60 %hours
-    C_num(1,j)=C_i; %boundary cond.
+    C_num(1,j+1)=C_i; %boundary cond.
     for i=2:length(x)-1
         C_num(i,j+1)=C_num(i,j) + r*(C_num(i+1,j)-2*C_num(i,j)+C_num(i-1,j));
     end
@@ -84,13 +84,14 @@ j=j+1;
 t=t+dt;
 end
 
+
 figure
-plot(x,C_an(:,2))
+plot(x(1:15),C_an(1:15,2))
 hold on
-plot(x,C_num(:,j-1))
+plot(x(1:15),C_num(1:15,j-1),'.')
 grid
 legend('Analytic','Numeric')
-title('Concentration profile')
+title('Concentration profile, 2D')
 xlabel('Position [µm]')
 ylabel('Composition B')
 leg = strtrim(cellstr(num2str((t./(60^2))'))');
