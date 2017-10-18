@@ -42,16 +42,15 @@ for i=1:length(t)
     C_an(:,i)= C_an_eq(x,t(i));
 end
 figure
-hold on
 plot(x(1:15),C_an(1:15,:)*100)
 grid
-title('Concentration profile, analytic 2D')
+title('Concentration profile, analytic 1D')
 xlabel('Position [µm]')
 ylabel('% B')
 leg = strtrim(cellstr(num2str((t./(60^2))'))');
 legend(strcat(leg,'  hours'))
-%Numerisk del Eirik
-%Numerical iii)a)----------------------------
+
+%iii)a)----------------------------
 
 %Initial values
 
@@ -86,18 +85,19 @@ end
 
 
 figure
+
 plot(x(1:15),C_an(1:15,2))
 hold on
-plot(x(1:15),C_num(1:15,j-1),'.')
+plot(x(1:15),C_num(1:15,j-1))
 grid
 legend('Analytic','Numeric')
-title('Concentration profile, 2D')
+title('Concentration profile, 1D')
 xlabel('Position [µm]')
 ylabel('Composition B')
 leg = strtrim(cellstr(num2str((t./(60^2))'))');
 
 
-%Isokinetic solution iii)b)----------------------------
+%iii)b)----------------------------
 
 k_eq = @(C_i) 2*(C_i-v.C_0)/(v.C_p-v.C_0);
 
@@ -115,14 +115,36 @@ i=i+1;
 end
 
 figure
+subplot(2,2,1)
 plot(t(1:length(t)-1),B_norm)
-
 axis([0 20 0 1])
-title('plate dissolution')
+title('Plate dissolution, 1D')
 ylabel('scaled volume fraction')
 xlabel('time[s]')
+grid
 
 
+
+%iii)c)----------------------------
+clear t
+dt=0.001;
+B_num(1)=c.B0;
+B_num_norm(1)=1;
+
+t(1)=0;
+j=1;
+while B_num_norm(j)>0
+t(j+1)=t(j)+dt;
+%Backwards euler
+    B_num(j+1)=B_num(j)-dt*(k/2)*sqrt(D_T/(pi*t(j+1)));
+    B_num_norm(j+1)=B_num(j+1)/c.B0;
+j=j+1;
+end
+
+
+hold on
+plot(t,B_num_norm)
+legend('Analytic','Numeric')
 
 %tr1=(pi/D_T(T))*(c.B0/B0r).^2 
 %t1star=trl*(k)
