@@ -97,12 +97,12 @@ ylabel('Composition B')
 leg = strtrim(cellstr(num2str((t./(60^2))'))');
 
 
-%Isokinetic solution iii)b)----------------------------
+%Isothermal annealing, analytical solution iii)b)--------------------
 
 k_eq = @(C_i) 2*(C_i-v.C_0)/(v.C_p-v.C_0);
 
 k=k_eq(C_i);
-%B
+
 B_eq = @(k,t) c.B0 - (k/sqrt(pi))*sqrt(D_T*t);
 B_norm(1)=1;
 i=1;
@@ -128,4 +128,8 @@ xlabel('time[s]')
 %t1star=trl*(k)
 %scaledvolf=1-sqrt(t/t1star);
 
+%Isokinetic annealing, analytic solution iii)e)----------------------
 
+f(1)=1;
+t1_star_eq= @(k_r) k_r*c.B0/k/B_0r
+while 
