@@ -17,13 +17,14 @@ v.C_p=100;
 v.C_0=0;
 %----------------------------------------
 
-%Diffusion
+%-------------Diffusion------------------
 D_eq = @(T) c.D0*exp(-c.Q/(c.R*T));  % [mm^2/s]
 D_T=D_eq(v.T_iso);
-
-%Ci
+%----------------------------------------
+%-----------------Ci---------------------
 Ci_eq = @(T) c.Cstar*exp(-c.dH_0/(c.R*T));
 C_i=Ci_eq(v.T_iso);
+%----------------------------------------
 
 t=[0.5,1,2,3]*60*60; %hours
 
@@ -45,12 +46,10 @@ for i=1:length(t)
 end
 grid
 title('Concentration profile, analytic 1D')
-
 xlabel('Position [�m]')
 ylabel('C')
 axis([c.B0 3*10^-5 0 C_i])
 legend(anlegend)
-
 
 %iii)a)----------------------------
 
@@ -93,8 +92,6 @@ leg = strtrim(cellstr(num2str((t./(60^2))'))');
 
 
 %Isothermal annealing, analytical solution iii)b)--------------------
-
-
 k_eq = @(C_i) 2*(C_i-v.C_0)/(v.C_p-v.C_0);
 
 k=k_eq(C_i);
@@ -216,13 +213,13 @@ plot(t,B_num_noniso_1_norm)
 hold on
 plot(t,B_num_noniso_2_norm)
 axis([0 inf 0 1])
-title('Plate dissolution, non-isothermal, 1D')
+title('Plate dissolution, two-step, 1D')
 ylabel('scaled volume fraction')
 xlabel('time[s]')
 grid
 
 
-%iii)d)----------------------------
+%iii)e)----------------------------
 %Non isothermal case
 T1=430+273; %[K]
 T2=400+273; %[K]
@@ -232,11 +229,6 @@ clear B_num_noniso_2
 clear B_num_noniso_1
 clear B_num_noniso_2_norm
 clear B_num_noniso_1_norm
-xgrid=5000;
-xend=5*10^-5;
-x=linspace(c.B0,xend,xgrid); 
-dt=0.001; %time step
-dx=x(2)-x(1); %distance step
 
 t(1)=0;
 j=1;
@@ -245,32 +237,22 @@ Ci_1=Ci_eq(T1);
 D_2=D_eq(T1);
 Ci_2=Ci_eq(T1);
 
-
 B_num_noniso_2(1)=c.B0;
 B_num_noniso_2_norm(1)=1;
 B_num_noniso_1(1)=c.B0;
 B_num_noniso_1_norm(1)=1;
-Tnum1=T1;
-Tnum2=T1;
 
-r= @(D) (D*dt)/(dx^2);
 r1=r(D_1);
 r2=r(D_1);
 Cstart1(1:length(x),1)=v.C_0;
 Cstart1(1,1)=C_i;
 Cstart2=Cstart1;
-% while t<60*60
-%     Cnext(:,j)=Cnum(v,c,r,x,Cstart);
-%     Cstart=Cnext(:,j);
-%     j=j+1;
-%     t=t+dt;
-% end
+
 while B_num_noniso_2_norm(j)>0
     t(j+1)=t(j)+dt;
 if B_num_noniso_1_norm(j)<0.7
     D_1=D_eq(T2);
-    Ci_1=Ci_eq(T2);
-    Tnum1=T2;  
+    Ci_1=Ci_eq(T2); 
     r1=r(D_2);
     if r1>0.5
         display('Numerical stability error: decrease dt or increase dx')
@@ -279,7 +261,6 @@ end
 if B_num_noniso_2_norm(j)<0.3
     D_2=D_eq(T2);
     Ci_2=Ci_eq(T2);
-    Tnum2=T2;
     r2=r(D_2);
     if r2>0.5
         display('Numerical stability error: decrease dt or increase dx')
@@ -308,7 +289,7 @@ plot(t,B_num_noniso_1_norm)
 hold on
 plot(t,B_num_noniso_2_norm)
 axis([0 inf 0 1])
-title('Plate dissolution, non-isothermal, 1D')
+title('Plate dissolution, two-step, 1D')
 ylabel('scaled volume fraction')
 xlabel('time[s]')
 grid

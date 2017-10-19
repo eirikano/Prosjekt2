@@ -28,7 +28,7 @@ C_i=Ci_eq(v.T_iso);
 t=[0.5,1,2,3]*60*60; %hours
 
 xgrid=5000;
-xend=10^-3;
+xend=5*10^-3;
 x=linspace(c.B0,xend,xgrid); 
 dt=1; %time step
 dx=x(2)-x(1); %distance step
@@ -151,7 +151,7 @@ T2=430+273; %[K]
 T1=400+273; %[K]
 
 clear t
-xgrid=5000;
+xgrid=7000;
 xend=5*10^-5;
 x=linspace(c.B0,xend,xgrid); 
 dt=0.001; %time step
@@ -168,8 +168,6 @@ B_num_noniso_2(1)=c.B0;
 B_num_noniso_2_norm(1)=1;
 B_num_noniso_1(1)=c.B0;
 B_num_noniso_1_norm(1)=1;
-Tnum1=T1;
-Tnum2=T1;
 
 r= @(D) (D*dt)/(dx^2);
 r1=r(D_1);
@@ -177,46 +175,37 @@ r2=r(D_1);
 Cstart1(1:length(x),1)=v.C_0;
 Cstart1(1,1)=C_i;
 Cstart2=Cstart1;
-% while t<60*60
-%     Cnext(:,j)=Cnum(v,c,r,x,Cstart);
-%     Cstart=Cnext(:,j);
-%     j=j+1;
-%     t=t+dt;
-% end
-while B_num_noniso_2_norm(j)>0
 
+while B_num_noniso_2_norm(j)>0
     t(j+1)=t(j)+dt;
 if B_num_noniso_1_norm(j)<0.7
     D_1=D_eq(T2);
     Ci_1=Ci_eq(T2);
-    Tnum1=T2;  
     r1=r(D_2);
     if r1>0.5
         display('Numerical stability error: decrease dt or increase dx')
     end
-
 end
 if B_num_noniso_2_norm(j)<0.3
     D_2=D_eq(T2);
     Ci_2=Ci_eq(T2);
-    Tnum2=T2;
     r2=r(D_2);
     if r2>0.5
         display('Numerical stability error: decrease dt or increase dx')
     end
 end
-Cstart1(1,j)=Ci_1;
-Cstart2(1,j)=Ci_2;
-Cnext1(:,j)=Cnum(v,r1,x,Cstart1(:,j));
-Cnext2(:,j)=Cnum(v,r2,x,Cstart2(:,j));
+Cstart1(1,1)=Ci_1;
+Cstart2(1,1)=Ci_2;
+Cnext1(:,j)=Cnum(v,r1,x,Cstart1(:,1));
+Cnext2(:,j)=Cnum(v,r2,x,Cstart2(:,1));
 
-Cstart1(:,j)=Cnext1(:,j);
-Cstart2(:,j)=Cnext2(:,j);
+Cstart1(:,1)=Cnext1(:,j);
+Cstart2(:,1)=Cnext2(:,j);
 
-B_num_noniso_1(j+1)=B_num_noniso_1(j)+((dt*D_1)/(dx*(v.C_p-Ci_1)))*(Cnext1(2)-Cnext1(1));
+B_num_noniso_1(j+1)=B_num_noniso_1(j)+((dt*D_1)/(dx*(v.C_p-Ci_1)))*(Cnext1(2,j)-Cnext1(1,j));
 B_num_noniso_1_norm(j+1)=(B_num_noniso_1(j+1))/c.B0;
 
-B_num_noniso_2(j+1)=B_num_noniso_2(j)+((dt*D_2)/(dx*(v.C_p-Ci_2)))*(Cnext2(2)-Cnext2(1));
+B_num_noniso_2(j+1)=B_num_noniso_2(j)+((dt*D_2)/(dx*(v.C_p-Ci_2)))*(Cnext2(2,j)-Cnext2(1,j));
 B_num_noniso_2_norm(j+1)=(B_num_noniso_2(j+1))/c.B0;
 
 j=j+1;
@@ -227,23 +216,22 @@ plot(t,B_num_noniso_1_norm)
 hold on
 plot(t,B_num_noniso_2_norm)
 axis([0 inf 0 1])
-title('Plate dissolution, non-isothermal, 1D')
+title('Plate dissolution, two-step, 1D')
 ylabel('scaled volume fraction')
 xlabel('time[s]')
 grid
 
 
-%iii)d)----------------------------
+%iii)e)----------------------------
 %Non isothermal case
-T2=430+273; %[K]
-T1=400+273; %[K]
+T1=430+273; %[K]
+T2=400+273; %[K]
 
 clear t
-xgrid=5000;
-xend=5*10^-5;
-x=linspace(c.B0,xend,xgrid); 
-dt=0.001; %time step
-dx=x(2)-x(1); %distance step
+clear B_num_noniso_2
+clear B_num_noniso_1
+clear B_num_noniso_2_norm
+clear B_num_noniso_1_norm
 
 t(1)=0;
 j=1;
@@ -265,12 +253,7 @@ r2=r(D_1);
 Cstart1(1:length(x),1)=v.C_0;
 Cstart1(1,1)=C_i;
 Cstart2=Cstart1;
-% while t<60*60
-%     Cnext(:,j)=Cnum(v,c,r,x,Cstart);
-%     Cstart=Cnext(:,j);
-%     j=j+1;
-%     t=t+dt;
-% end
+
 while B_num_noniso_2_norm(j)>0
     t(j+1)=t(j)+dt;
 if B_num_noniso_1_norm(j)<0.7
@@ -291,30 +274,30 @@ if B_num_noniso_2_norm(j)<0.3
         display('Numerical stability error: decrease dt or increase dx')
     end
 end
-Cstart1(1,j)=Ci_1;
-Cstart2(1,j)=Ci_2;
-Cnext1(:,j)=Cnum(v,r1,x,Cstart1(:,j));
-Cnext2(:,j)=Cnum(v,r2,x,Cstart2(:,j));
+Cstart1(1,1)=Ci_1;
+Cstart2(1,1)=Ci_2;
+Cnext1(:,j)=Cnum(v,r1,x,Cstart1(:,1));
+Cnext2(:,j)=Cnum(v,r2,x,Cstart2(:,1));
 
-Cstart1(:,j)=Cnext1(:,j);
-Cstart2(:,j)=Cnext2(:,j);
+Cstart1(:,1)=Cnext1(:,j);
+Cstart2(:,1)=Cnext2(:,j);
 
-
-B_num_noniso_1(j+1)=B_num_noniso_1(j)+((dt*D_1)/(dx*(v.C_p-Ci_1)))*(Cnext1(2)-Cnext1(1));
+B_num_noniso_1(j+1)=B_num_noniso_1(j)+((dt*D_1)/(dx*(v.C_p-Ci_1)))*(Cnext1(2,j)-Cnext1(1,j));
 B_num_noniso_1_norm(j+1)=(B_num_noniso_1(j+1))/c.B0;
 
-B_num_noniso_2(j+1)=B_num_noniso_2(j)+((dt*D_2)/(dx*(v.C_p-Ci_2)))*(Cnext2(2)-Cnext2(1));
+B_num_noniso_2(j+1)=B_num_noniso_2(j)+((dt*D_2)/(dx*(v.C_p-Ci_2)))*(Cnext2(2,j)-Cnext2(1,j));
 B_num_noniso_2_norm(j+1)=(B_num_noniso_2(j+1))/c.B0;
 
 j=j+1;
 end
 
-subplot(2,2,2)
+
+subplot(2,2,3)
 plot(t,B_num_noniso_1_norm)
 hold on
 plot(t,B_num_noniso_2_norm)
 axis([0 inf 0 1])
-title('Plate dissolution, non-isothermal, 1D')
+title('Plate dissolution, tw, 1D')
 ylabel('scaled volume fraction')
 xlabel('time[s]')
 grid
@@ -327,9 +310,9 @@ k_1=k_T1;
 B_eq = @(k, D,t) c.B0 - (k/sqrt(pi))*sqrt(D*t);
 B_normE(1)=1;
 i=1;
-t(1)=0;
+t=0;
 dt=0.1;
-while B_normE(i)>0
+while B_normE>0
 
 B_normE(i)= B_eq(k_1, D_1,t(i))/c.B0;
 if B_normE(i)<0.7
@@ -337,8 +320,8 @@ if B_normE(i)<0.7
     k_2=k_T2;
     B_normE07(i)= B_eq(k_2, D_2,t(i))/c.B0;
     
-    if B_normE07(i)< 0
-        B_normE07(i)=0;
+    if B_normE07(i)<= 0
+       B_normE07(i)=NaN;
     end
 end
 
@@ -347,13 +330,13 @@ if B_normE(i)<0.3
     k_2=k_T2;
     B_normE03(i)= B_eq(k_2, D_2,t(i))/c.B0;
     
-    if B_normE03(i)< 0
-        B_normE03(i)=0;
+    if B_normE03(i) <= 0
+       B_normE03(i) = NaN;
     end
 end
 t(i+1)=t(i)+dt;
 i=i+1;
 end
-
-plot(t(1:length(t)-1),B_norm)
-
+x1=1:(length(t)-1);
+subplot(2,2,4)
+plot(x1,B_normE, x1,B_normE07, x1,B_normE03)
