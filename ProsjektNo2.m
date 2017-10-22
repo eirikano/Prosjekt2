@@ -100,7 +100,7 @@ B_eq = @(k,t) c.B0 - (k/sqrt(pi))*sqrt(D_T*t);
 B_norm(1)=1;
 i=1;
 t(1)=0;
-dt=1;
+dt=0.1;
 while B_norm>0
 B_norm(i)= B_eq(k,t(i))/c.B0;
 t(i+1)=t(i)+dt;
@@ -295,40 +295,69 @@ xlabel('time[s]')
 grid
 
 %Isokinetic annealing, analytic solution iii)e)----------------------
+%% sgsge
+D_1=D_eq(T2);
+k=k_eq(C_i);
 
-D_1=D_T1;
-k_1=k_T1;
-
-B_eq = @(k, D,t) c.B0 - (k/sqrt(pi))*sqrt(D*t);
-B_normE(1)=1;
+t1star=t1star_eq(D_T,k);
 i=1;
-t=0;
-dt=0.1;
-while B_normE>0
+dt=0.0005;
+t=[0:dt:20];
 
-B_normE(i)= B_eq(k_1, D_1,t(i))/c.B0;
-if B_normE(i)<0.7
-    D_2=D_T2;
-    k_2=k_T2;
-    B_normE07(i)= B_eq(k_2, D_2,t(i))/c.B0;
-    
-    if B_normE07(i)<= 0
-       B_normE07(i)=NaN;
-    end
-end
+f_low11=1;
+f_low12=1;
+bytte07=0;
+bytte03=0;
+sum=0;
 
-if B_normE(i)<0.3
-    D_2=D_T2;
-    k_2=k_T2;
-    B_normE03(i)= B_eq(k_2, D_2,t(i))/c.B0;
+while f_low11(i) > 0 
     
-    if B_normE03(i) <= 0
-       B_normE03(i) = NaN;
+    sum(i+1)=sum(i)+(dt/t1star);
+    f_low11(i+1)=1-sqrt(sum(i));
+    if (f_low11(i) <= 0.7) && (bytte07==0)
+        C_i=Ci_eq(T1);
+        D_1=D_eq(T1);
+        k=k_eq(C_i);
+        t1star=t1star_eq(D_1,k);
+        tid_low07 = i;
+        bytte07=1;
     end
+    i=i+1;
 end
-t(i+1)=t(i)+dt;
-i=i+1;
+tid1=i;
+
+
+D_T=D_eq(T2);
+C_i=Ci_eq(T2);
+k=k_eq(C_i);
+
+t1star=t1star_eq(D_T,k);
+i=1;
+
+sum=0;
+while f_low12 > 0
+
+    sum(i+1)=sum(i)+(dt/t1star);
+    f_low12(i+1)=1-sqrt(sum(i));
+    if (f_low12(i) <= 0.3) && (bytte03==0)
+        C_i=Ci_eq(T1);
+        D_1=D_eq(T1);
+        k_e=k_eq(C_i);
+        t1star=t1star_eq(D_1,k_e);
+        tid_low03 = i;
+        bytte03=1;
+    end
+    i=i+1;
+    
 end
-x1=1:(length(t)-1);
-subplot(2,2,4)
-plot(x1,B_normE, x1,B_normE07, x1,B_normE03)
+tid2=i;
+
+
+figure 
+plot (t(1:tid1), f_low11, t(1:tid2), f_low12)
+hold on
+plot
+axis([0 inf 0 1])
+title('isokinetic solution')
+ylabel('scaled volume fraction')
+xlabel('time[s]')
