@@ -12,18 +12,19 @@ c.B0=0.001*10^-6; %[m]
 %----------------------------------------
 
 %-------------Variables------------------
-v.T_iso=400+273; %[K]
+v.T_1=400+273; %[K]
+v.T_2=430+273;
 v.C_p=100;
 v.C_0=0;
 %----------------------------------------
 
 %-------------Diffusion------------------
 D_eq = @(T) c.D0*exp(-c.Q/(c.R*T));  % [mm^2/s]
-D_T=D_eq(v.T_iso);
+D_T1=D_eq(v.T_1);
 %----------------------------------------
 %-----------------Ci---------------------
 Ci_eq = @(T) c.Cstar*exp(-c.dH_0/(c.R*T));
-C_i=Ci_eq(v.T_iso);
+C_i_T1=Ci_eq(v.T_1);
 %----------------------------------------
 
 t=[0.5,1,2,3]*60*60; %hours
@@ -36,7 +37,7 @@ dx=x(2)-x(1); %distance step
 
 
 %Analytic solution
-C_an_eq = @(x,t) C_i-(C_i - v.C_0).*erf((x-c.B0)./(2*sqrt(D_T*t)));
+C_an_eq = @(x,t) C_i_T1-(C_i_T1 - v.C_0).*erf((x-c.B0)./(2*sqrt(D_T1*t)));
 figure
 for i=1:length(t)
     C_an(:,i)= C_an_eq(x,t(i));
@@ -45,30 +46,26 @@ for i=1:length(t)
     hold on
 end
 grid
-title('Concentration profile, analytic 1D')
+title('a)Concentration profile, analytic 1D')
 xlabel('Position [�m]')
 ylabel('C')
-axis([c.B0 3*10^-5 0 C_i])
+axis([c.B0 3*10^-5 0 C_i_T1])
 legend(anlegend)
 
-%iii)a)----------------------------
 
-%Initial conc.
-C_i=Ci_eq(v.T_iso);
+%iii)a)-------------------------------------------------------------
 
-%Diffusion
-D_T=D_eq(v.T_iso);
 
 %Stability
-r=(D_T*dt)/(dx^2);
+r=(D_T1*dt)/(dx^2);
 while r>0.5
     dt=dt/4;
-    r=(D_T*dt)/(dx^2);
+    r=(D_T1*dt)/(dx^2);
 end
 t=0;
 dt=1;
 Cstart(1:length(x),1)=v.C_0;
-Cstart(1,1)=C_i;
+Cstart(1,1)=C_i_T1;
 j=1;
 while t<60*60
     Cnext(:,j)=Cnum(v,r,x,Cstart);
@@ -83,8 +80,8 @@ hold on
 plot(x,C_numeric(:,1))
 grid
 legend('Analytic','Numeric')
-axis([c.B0 3*10^-5 0 C_i])
-title('Concentration profile, 1D')
+axis([c.B0 3*10^-5 0 C_i_T1])
+title('a)Concentration profile, 1D')
 xlabel('Position [µm]')
 ylabel('Composition B')
 leg = strtrim(cellstr(num2str((t./(60^2))'))');
@@ -94,9 +91,9 @@ leg = strtrim(cellstr(num2str((t./(60^2))'))');
 %Isothermal annealing, analytical solution iii)b)--------------------
 k_eq = @(C_i) 2*(C_i-v.C_0)/(v.C_p-v.C_0);
 
-k=k_eq(C_i);
+k=k_eq(C_i_T1);
 
-B_eq = @(k,t) c.B0 - (k/sqrt(pi))*sqrt(D_T*t);
+B_eq = @(k,t) c.B0 - (k/sqrt(pi))*sqrt(D_T1*t);
 B_norm(1)=1;
 i=1;
 t(1)=0;
@@ -111,26 +108,31 @@ figure
 subplot(2,2,1)
 plot(t(1:length(t)-1),B_norm)
 axis([0 20 0 1])
-title('Plate dissolution, 1D')
+title('b)Plate dissolution, 1D')
 ylabel('scaled volume fraction')
 xlabel('time[s]')
 grid
 
 
 
-%iii)c)----------------------------
+%iii)c)Plate and spherical isothermal
 clear t
 dt=0.01;
 B_num(1)=c.B0;
 B_num_norm(1)=1;
 
+r_num(1)=c.B0;
+r_num_norm(1)=1;
+
 t(1)=0;
 j=1;
-while B_num_norm(j)>0
+while (B_num_norm(j)>0)
 t(j+1)=t(j)+dt;
 %Backwards euler
-    B_num(j+1)=B_num(j)-dt*(k/2)*sqrt(D_T/(pi*t(j+1)));
+    %Plate-like precipitates
+    B_num(j+1)=B_num(j)-dt*(k/2)*sqrt(D_T1/(pi*t(j+1)));
     B_num_norm(j+1)=B_num(j+1)/c.B0;
+    
 j=j+1;
 end
 
@@ -141,12 +143,9 @@ legend('Analytic','Numeric')
 
 
 
-
+%%
 %iii)d)----------------------------
-%Non isothermal case
-T2=430+273; %[K]
-T1=400+273; %[K]
-
+%Non isothermal case Two-Step
 clear t
 xgrid=7000;
 xend=5*10^-5;
@@ -156,10 +155,10 @@ dx=x(2)-x(1); %distance step
 
 t(1)=0;
 j=1;
-D_1=D_eq(T1);
-Ci_1=Ci_eq(T1);
-D_2=D_eq(T1);
-Ci_2=Ci_eq(T1);
+D_1=D_eq(v.T_1);
+Ci_1=Ci_eq(v.T_1);
+D_2=D_eq(v.T_1);
+Ci_2=Ci_eq(v.T_1);
 
 B_num_noniso_2(1)=c.B0;
 B_num_noniso_2_norm(1)=1;
@@ -170,26 +169,29 @@ r= @(D) (D*dt)/(dx^2);
 r1=r(D_1);
 r2=r(D_1);
 Cstart1(1:length(x),1)=v.C_0;
-Cstart1(1,1)=C_i;
+Cstart1(1,1)=C_i_T1;
 Cstart2=Cstart1;
-
+alreadychanged1=0;
+alreadychanged2=0;
 while B_num_noniso_2_norm(j)>0
     t(j+1)=t(j)+dt;
-if B_num_noniso_1_norm(j)<0.7
-    D_1=D_eq(T2);
-    Ci_1=Ci_eq(T2);
+if (B_num_noniso_1_norm(j)<0.7)&&(alreadychanged1==0)
+    D_1=D_eq(v.T_2);
+    Ci_1=Ci_eq(v.T_2);
     r1=r(D_2);
     if r1>0.5
         display('Numerical stability error: decrease dt or increase dx')
     end
+    alreadychanged1=1;
 end
-if B_num_noniso_2_norm(j)<0.3
-    D_2=D_eq(T2);
-    Ci_2=Ci_eq(T2);
+if (B_num_noniso_2_norm(j)<0.3)&&(alreadychanged2==0)
+    D_2=D_eq(v.T_2);
+    Ci_2=Ci_eq(v.T_2);
     r2=r(D_2);
     if r2>0.5
         display('Numerical stability error: decrease dt or increase dx')
     end
+    alreadychanged2=1;
 end
 Cstart1(1,1)=Ci_1;
 Cstart2(1,1)=Ci_2;
@@ -209,20 +211,17 @@ j=j+1;
 end
 
 subplot(2,2,2)
-plot(t,B_num_noniso_1_norm)
+plot(t,B_num_noniso_1_norm,'b--',t,B_num_noniso_2_norm,'b--')
 hold on
-plot(t,B_num_noniso_2_norm)
 axis([0 inf 0 1])
-title('Plate dissolution, two-step, 1D')
+title('d)Plate dissolution, two-step, 1D')
 ylabel('scaled volume fraction')
 xlabel('time[s]')
 grid
 
-
+%%
 %iii)e)----------------------------
-%Non isothermal case
-T1=430+273; %[K]
-T2=400+273; %[K]
+%Non isothermal case Two-Step
 
 clear t
 clear B_num_noniso_2
@@ -232,10 +231,10 @@ clear B_num_noniso_1_norm
 
 t(1)=0;
 j=1;
-D_1=D_eq(T1);
-Ci_1=Ci_eq(T1);
-D_2=D_eq(T1);
-Ci_2=Ci_eq(T1);
+D_1=D_eq(v.T_2);
+Ci_1=Ci_eq(v.T_2);
+D_2=D_eq(v.T_2);
+Ci_2=Ci_eq(v.T_2);
 
 B_num_noniso_2(1)=c.B0;
 B_num_noniso_2_norm(1)=1;
@@ -245,23 +244,24 @@ B_num_noniso_1_norm(1)=1;
 r1=r(D_1);
 r2=r(D_1);
 Cstart1(1:length(x),1)=v.C_0;
-Cstart1(1,1)=C_i;
+Cstart1(1,1)=C_i_T1;
 Cstart2=Cstart1;
-
+alreadychanged1=0;
+alreadychanged2=0;
 while B_num_noniso_2_norm(j)>0
     t(j+1)=t(j)+dt;
-if B_num_noniso_1_norm(j)<0.7
-    D_1=D_eq(T2);
-    Ci_1=Ci_eq(T2); 
-    r1=r(D_2);
+if (B_num_noniso_1_norm(j)<0.7)&&(alreadychanged1==0)
+    D_1=D_eq(v.T_1);
+    Ci_1=Ci_eq(v.T_1); 
+    r1=r(D_1);
     if r1>0.5
         display('Numerical stability error: decrease dt or increase dx')
     end
 end
-if B_num_noniso_2_norm(j)<0.3
-    D_2=D_eq(T2);
-    Ci_2=Ci_eq(T2);
-    r2=r(D_2);
+if (B_num_noniso_2_norm(j)<0.3)&&(alreadychanged2==0)
+    D_2=D_eq(v.T_1);
+    Ci_2=Ci_eq(v.T_1);
+    r2=r(D_1);
     if r2>0.5
         display('Numerical stability error: decrease dt or increase dx')
     end
@@ -283,8 +283,7 @@ B_num_noniso_2_norm(j+1)=(B_num_noniso_2(j+1))/c.B0;
 j=j+1;
 end
 
-
-subplot(2,2,3)
+figure
 plot(t,B_num_noniso_1_norm)
 hold on
 plot(t,B_num_noniso_2_norm)
@@ -296,10 +295,10 @@ grid
 
 %Isokinetic annealing, analytic solution iii)e)----------------------
 %% sgsge
-D_1=D_eq(T2);
-k=k_eq(C_i);
-
-t1star=t1star_eq(D_T,k);
+D_1=D_eq(v.T_1);
+k=k_eq(C_i_T1);
+t1star_eq=@(k,D) (pi*c.B0^2)/(D*k^2);
+t1star=t1star_eq(k,D_1);
 i=1;
 dt=0.0005;
 t=[0:dt:20];
@@ -315,10 +314,10 @@ while f_low11(i) > 0
     sum(i+1)=sum(i)+(dt/t1star);
     f_low11(i+1)=1-sqrt(sum(i));
     if (f_low11(i) <= 0.7) && (bytte07==0)
-        C_i=Ci_eq(T1);
-        D_1=D_eq(T1);
-        k=k_eq(C_i);
-        t1star=t1star_eq(D_1,k);
+        C_i_T2=Ci_eq(v.T_2);
+        D_T2=D_eq(v.T_2);
+        k=k_eq(C_i_T2);
+        t1star=t1star_eq(k,D_T2);
         tid_low07 = i;
         bytte07=1;
     end
@@ -327,11 +326,11 @@ end
 tid1=i;
 
 
-D_T=D_eq(T2);
-C_i=Ci_eq(T2);
-k=k_eq(C_i);
+D_T1=D_eq(v.T_1);
+C_i_T1=Ci_eq(v.T_1);
+k=k_eq(C_i_T1);
 
-t1star=t1star_eq(D_T,k);
+t1star=t1star_eq(k,D_T1);
 i=1;
 
 sum=0;
@@ -340,10 +339,10 @@ while f_low12 > 0
     sum(i+1)=sum(i)+(dt/t1star);
     f_low12(i+1)=1-sqrt(sum(i));
     if (f_low12(i) <= 0.3) && (bytte03==0)
-        C_i=Ci_eq(T1);
-        D_1=D_eq(T1);
-        k_e=k_eq(C_i);
-        t1star=t1star_eq(D_1,k_e);
+        C_i_T2=Ci_eq(v.T_2);
+        D_T2=D_eq(v.T_2);
+        k_e=k_eq(C_i_T2);
+        t1star=t1star_eq(k_e,D_T2);
         tid_low03 = i;
         bytte03=1;
     end
@@ -353,11 +352,9 @@ end
 tid2=i;
 
 
-figure 
-plot (t(1:tid1), f_low11, t(1:tid2), f_low12)
-hold on
-plot
-axis([0 inf 0 1])
-title('isokinetic solution')
-ylabel('scaled volume fraction')
-xlabel('time[s]')
+figure(3)
+subplot(2,2,2)
+plot (t(1:tid1), f_low11,,'r' t(1:tid2), f_low12,'r')
+% hold on
+% plot
+legend('Numeric solution','','Isokinetic solution','')
