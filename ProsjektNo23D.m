@@ -12,18 +12,19 @@ c.B0=0.025*10^-6; %[m]
 %----------------------------------------
 
 %-------------Variables------------------
-v.T_iso=400+273; %[K]
+v.T_1=400+273; %[K]
+v.T_2=430+273;
 v.C_p=100;
 v.C_0=0;
 %----------------------------------------
 
 %-------------Diffusion------------------
 D_eq = @(T) c.D0*exp(-c.Q/(c.R*T));
-D_T=D_eq(v.T_iso);
+D_T=D_eq(v.T_1);
 %----------------------------------------
 %-----------------Ci---------------------
 Ci_eq = @(T) c.Cstar*exp(-c.dH_0/(c.R*T));
-C_i=Ci_eq(v.T_iso);
+C_i=Ci_eq(v.T_1);
 %----------------------------------------
 
 %------------------k---------------------
@@ -176,15 +177,13 @@ grid
 %Spherical precipitate numeric
 %Non isothermal case Two-Step (low to high temp)
 x=linspace(c.B0,xend,xgrid);
-T1=400+273; %[K]
-T2=430+273; %[K]
 dt=10^-2;
 
 j=n; %starting from saved index value from isothermal task
-D_1=D_eq(T2);
-Ci_1=Ci_eq(T2);
-D_2=D_eq(T1);
-Ci_2=Ci_eq(T1);
+D_1=D_eq(v.T_2);
+Ci_1=Ci_eq(v.T_2);
+D_2=D_eq(v.T_1);
+Ci_2=Ci_eq(v.T_1);
 
 while dt>(dx^2)/(2*D_1) %adjusting dt to stability requirement
     dt=dt/2;
@@ -208,8 +207,8 @@ while (r_num_noniso_1_norm(j)>0)||(r_num_noniso_2_norm(j)>0)
     x1=linspace(r_num_noniso_1(j),x1(length(x1))+dr1,xgrid); %move the x-vector with the decreasing particle size
     x2=linspace(r_num_noniso_2(j),x1(length(x2))+dr2,xgrid); 
     if (r_num_noniso_2_norm(j)<0.3)&&(alreadychanged2==0)
-        D_2=D_eq(T2);
-        Ci_2=Ci_eq(T2);
+        D_2=D_eq(v.T_2);
+        Ci_2=Ci_eq(v.T_2);
         alreadychanged2=1;
     end
     Cstart1(1,1)=Ci_1;
@@ -244,8 +243,6 @@ grid
 %Spherical precipitate numeric
 %Non isothermal case Two-Step
 %Only change is switching of T1 and T2
-T1=430+273; %[K]
-T2=400+273; %[K]
 
 clear t
 clear r_num_noniso_1
@@ -257,10 +254,10 @@ clear Cnext2
 dt=10^-2;
 t(1)=0;
 j=1;
-D_1=D_eq(T1);
-Ci_1=Ci_eq(T1);
-D_2=D_eq(T1);
-Ci_2=Ci_eq(T1);
+D_1=D_eq(v.T_2);
+Ci_1=Ci_eq(v.T_2);
+D_2=D_eq(v.T_2);
+Ci_2=Ci_eq(v.T_2);
 while dt>(dx^2)/(2*D_1) %adjusting dt to stability requirement
     dt=dt/2;
 end
@@ -284,16 +281,16 @@ while (r_num_noniso_1_norm(j)>0)||(r_num_noniso_2_norm(j)>0)
     x1=linspace(r_num_noniso_1(j),x1(length(x1))+dr1,xgrid); %move the x-vector with the decreasing particle size
     x2=linspace(r_num_noniso_2(j),x1(length(x2))+dr2,xgrid); 
     if (r_num_noniso_1_norm(j)<0.7)&&(alreadychanged1==0)
-        D_1=D_eq(T2);
-        Ci_1=Ci_eq(T2);
+        D_1=D_eq(v.T_1);
+        Ci_1=Ci_eq(v.T_1);
         alreadychanged1=1;
         while dt>(dx^2)/(2*D_1) %adjusting dt to stability requirement
             dt=dt/2;
         end
     end
     if (r_num_noniso_2_norm(j)<0.3)&&(alreadychanged2==0)
-        D_2=D_eq(T2);
-        Ci_2=Ci_eq(T2);
+        D_2=D_eq(v.T_1);
+        Ci_2=Ci_eq(v.T_1);
         alreadychanged2=1;
     end
     Cstart1(1,1)=Ci_1;
