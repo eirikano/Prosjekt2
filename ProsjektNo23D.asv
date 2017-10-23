@@ -12,18 +12,19 @@ c.B0=0.025*10^-6; %[m]
 %----------------------------------------
 
 %-------------Variables------------------
-v.T_iso=400+273; %[K]
+v.T_1=400+273; %[K]
+v.T_2=430+273;
 v.C_p=100;
 v.C_0=0;
 %----------------------------------------
 
 %-------------Diffusion------------------
 D_eq = @(T) c.D0*exp(-c.Q/(c.R*T));
-D_T=D_eq(v.T_iso);
+D_T=D_eq(v.T_1);
 %----------------------------------------
 %-----------------Ci---------------------
 Ci_eq = @(T) c.Cstar*exp(-c.dH_0/(c.R*T));
-C_i=Ci_eq(v.T_iso);
+C_i=Ci_eq(v.T_1);
 %----------------------------------------
 
 %------------------k---------------------
@@ -65,13 +66,10 @@ while dt>(dx^2)/(2*D_T) %adjusting dt to stability requirement
     dt=dt/2;
 end
 
-t=[0:dt:3]
-j=1;
-while t<3 %seconds  
+t=[0:dt:3];
+for j =1:length(t) 
     Cnext(:,j)=Cnumspher(v,dt,D_T,x,Cstart);
     Cstart=Cnext(:,j);
-    j=j+1;
-    t=t+dt;
 end
 C_numeric(:,1)=Cnext(:,j-1);
 
@@ -80,7 +78,7 @@ plot(x,C_an(:,4))
 hold on
 plot(x,C_numeric(:,1),'*')
 grid
-legend(['Analytic ' num2str(t) ' seconds'],['Numeric ' num2str(t) ' seconds'])
+legend(['Analytic ' num2str(t(length(t))) ' seconds'],['Numeric ' num2str(t(length(t))) ' seconds'])
 axis([c.B0 10^-5 0 C_i])
 title('a)Concentration profile, 1D')
 xlabel('Position [m]')
@@ -90,6 +88,7 @@ leg = strtrim(cellstr(num2str((t./(60^2))'))');
 %%
 %iii)b)----------------------------
 %By numerical solving of equation 16
+clear t
 t=[0.001:dt:13.5]; %can not divide by zero!
 r(1)=c.B0;
 for j =1:length(t)
@@ -178,15 +177,13 @@ grid
 %Spherical precipitate numeric
 %Non isothermal case Two-Step (low to high temp)
 x=linspace(c.B0,xend,xgrid);
-T1=400+273; %[K]
-T2=430+273; %[K]
 dt=10^-2;
 
 j=n; %starting from saved index value from isothermal task
-D_1=D_eq(T2);
-Ci_1=Ci_eq(T2);
-D_2=D_eq(T1);
-Ci_2=Ci_eq(T1);
+D_1=D_eq(v.T_2);
+Ci_1=Ci_eq(v.T_2);
+D_2=D_eq(v.T_1);
+Ci_2=Ci_eq(v.T_1);
 
 while dt>(dx^2)/(2*D_1) %adjusting dt to stability requirement
     dt=dt/2;
@@ -210,8 +207,8 @@ while (r_num_noniso_1_norm(j)>0)||(r_num_noniso_2_norm(j)>0)
     x1=linspace(r_num_noniso_1(j),x1(length(x1))+dr1,xgrid); %move the x-vector with the decreasing particle size
     x2=linspace(r_num_noniso_2(j),x1(length(x2))+dr2,xgrid); 
     if (r_num_noniso_2_norm(j)<0.3)&&(alreadychanged2==0)
-        D_2=D_eq(T2);
-        Ci_2=Ci_eq(T2);
+        D_2=D_eq(v.T_2);
+        Ci_2=Ci_eq(v.T_2);
         alreadychanged2=1;
     end
     Cstart1(1,1)=Ci_1;
@@ -234,7 +231,7 @@ while (r_num_noniso_1_norm(j)>0)||(r_num_noniso_2_norm(j)>0)
 end
 
 subplot(3,1,2)
-plot(t,r_num_noniso_1_norm)
+plot(t,r_num_noniso_1_norm,'r')
 hold on
 plot(t,r_num_noniso_2_norm)
 axis([0 inf 0 1])
@@ -246,8 +243,6 @@ grid
 %Spherical precipitate numeric
 %Non isothermal case Two-Step
 %Only change is switching of T1 and T2
-T1=430+273; %[K]
-T2=400+273; %[K]
 
 clear t
 clear r_num_noniso_1
@@ -259,10 +254,10 @@ clear Cnext2
 dt=10^-2;
 t(1)=0;
 j=1;
-D_1=D_eq(T1);
-Ci_1=Ci_eq(T1);
-D_2=D_eq(T1);
-Ci_2=Ci_eq(T1);
+D_1=D_eq(v.T_2);
+Ci_1=Ci_eq(v.T_2);
+D_2=D_eq(v.T_2);
+Ci_2=Ci_eq(v.T_2);
 while dt>(dx^2)/(2*D_1) %adjusting dt to stability requirement
     dt=dt/2;
 end
@@ -286,16 +281,16 @@ while (r_num_noniso_1_norm(j)>0)||(r_num_noniso_2_norm(j)>0)
     x1=linspace(r_num_noniso_1(j),x1(length(x1))+dr1,xgrid); %move the x-vector with the decreasing particle size
     x2=linspace(r_num_noniso_2(j),x1(length(x2))+dr2,xgrid); 
     if (r_num_noniso_1_norm(j)<0.7)&&(alreadychanged1==0)
-        D_1=D_eq(T2);
-        Ci_1=Ci_eq(T2);
+        D_1=D_eq(v.T_1);
+        Ci_1=Ci_eq(v.T_1);
         alreadychanged1=1;
         while dt>(dx^2)/(2*D_1) %adjusting dt to stability requirement
             dt=dt/2;
         end
     end
     if (r_num_noniso_2_norm(j)<0.3)&&(alreadychanged2==0)
-        D_2=D_eq(T2);
-        Ci_2=Ci_eq(T2);
+        D_2=D_eq(v.T_1);
+        Ci_2=Ci_eq(v.T_1);
         alreadychanged2=1;
     end
     Cstart1(1,1)=Ci_1;
@@ -319,9 +314,9 @@ while (r_num_noniso_1_norm(j)>0)||(r_num_noniso_2_norm(j)>0)
 end
 
 subplot(3,1,3)
-plot(t,r_num_noniso_1_norm)
+plot(t,r_num_noniso_1_norm, 'b')
 hold on
-plot(t,r_num_noniso_2_norm)
+plot(t,r_num_noniso_2_norm, 'b')
 axis([0 inf 0 1])
 title('d)Spherical dissolution, two-step, 3D')
 ylabel('scaled volume fraction')
@@ -329,3 +324,130 @@ xlabel('time[s]')
 grid
 
 
+
+%%
+D_1=D_eq(v.T_1);
+C_i_T1=Ci_eq(v.T_1);
+k=k_eq(C_i_T1);
+t2star_eq=@(k,D) c.B0^2/(D*k);
+
+t2star=t2star_eq(k,D_1);
+i=1;
+dt=0.0005;
+t=[0:dt:20];
+
+f_low1=1;
+f_low2=1;
+bytte07=0;
+bytte03=0;
+sum=0;
+
+while f_low1(i) > 0 
+    
+    sum(i+1)=sum(i)+(dt/t2star);
+    f_low1(i+1)=(1-sum(i))^3/2;
+    if (f_low1(i) <= 0.7) && (bytte07==0)
+        C_i_T2=Ci_eq(v.T_2);
+        D_T2=D_eq(v.T_2);
+        k=k_eq(C_i_T2);
+        t2star=t2star_eq(k,D_T2);
+        tid_low07 = i;
+        bytte07=1;
+    end
+    i=i+1;
+end
+tid1=i;
+
+
+D_T1=D_eq(v.T_1);
+C_i_T1=Ci_eq(v.T_1);
+k=k_eq(C_i_T1);
+
+t2star=t2star_eq(k,D_T1);
+i=1;
+
+sum=0;
+while f_low2 > 0
+
+    sum(i+1)=sum(i)+(dt/t2star);
+    f_low2(i+1)=1-sqrt(sum(i));
+    if (f_low2(i) <= 0.3) && (bytte03==0)
+        C_i_T2=Ci_eq(v.T_2);
+        D_T2=D_eq(v.T_2);
+        k=k_eq(C_i_T2);
+        t2star=t2star_eq(k,D_T2);
+        tid_low03 = i;
+        bytte03=1;
+    end
+    i=i+1;
+    
+end
+tid2=i;
+
+
+figure(3)
+subplot(3,1,2)
+plot(t(1:tid1), f_low1,'r', t(1:tid2), f_low2,'r')
+legend('Numeric solution','','Isokinetic solution','')
+
+%dissolution
+D_2=D_eq(v.T_2);
+k=k_eq(C_i_T2);
+t2star=t2star_eq(k,D_2);
+i=1;
+
+
+f_hi1=1;
+f_hi2=1;
+bytte07=0;
+bytte03=0;
+sum=0;
+
+while f_hi1(i) > 0 
+    
+    sum(i+1)=sum(i)+(dt/t2star);
+    f_hi1(i+1)=1-sqrt(sum(i));
+    if (f_hi1(i) <= 0.7) && (bytte07==0)
+        C_i_T1=Ci_eq(v.T_1);
+        D_T1=D_eq(v.T_1);
+        k=k_eq(C_i_T1);
+        t2star=t2star_eq(k,D_T1);
+        tid_hi07 = i;
+        bytte07=1;
+    end
+    i=i+1;
+end
+tid1=i;
+
+
+D_T2=D_eq(v.T_2);
+C_i_T2=Ci_eq(v.T_2);
+k=k_eq(C_i_T2);
+
+t2star=t2star_eq(k,D_T2);
+i=1;
+
+sum=0;
+while f_hi2 > 0
+
+    sum(i+1)=sum(i)+(dt/t2star);
+    f_hi2(i+1)=1-sqrt(sum(i));
+    if (f_hi2(i) <= 0.3) && (bytte03==0)
+        C_i_T1=Ci_eq(v.T_1);
+        D_T1=D_eq(v.T_1);
+        k=k_eq(C_i_T1);
+        t2star=t2star_eq(k,D_T1);
+        tid_hi03 = i;
+        bytte03=1;
+    end
+    i=i+1;
+    
+end
+tid2=i;
+
+
+figure(3)
+subplot(3,1,3)
+plot(t(1:tid1), f_hi1,'r', t(1:tid2), f_hi2,'r')
+
+legend('Numeric solution','','Isokinetic solution','')
