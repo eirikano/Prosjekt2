@@ -302,17 +302,17 @@ i=1;
 dt=0.0005;
 t=[0:dt:20];
 
-f_low11=1;
-f_low12=1;
+f_low1=1;
+f_low2=1;
 bytte07=0;
 bytte03=0;
 sum=0;
 
-while f_low11(i) > 0 
+while f_low1(i) > 0 
     
     sum(i+1)=sum(i)+(dt/t1star);
-    f_low11(i+1)=1-sqrt(sum(i));
-    if (f_low11(i) <= 0.7) && (bytte07==0)
+    f_low1(i+1)=1-sqrt(sum(i));
+    if (f_low1(i) <= 0.7) && (bytte07==0)
         C_i_T2=Ci_eq(v.T_2);
         D_T2=D_eq(v.T_2);
         k=k_eq(C_i_T2);
@@ -333,15 +333,15 @@ t1star=t1star_eq(k,D_T1);
 i=1;
 
 sum=0;
-while f_low12 > 0
+while f_low2 > 0
 
     sum(i+1)=sum(i)+(dt/t1star);
-    f_low12(i+1)=1-sqrt(sum(i));
-    if (f_low12(i) <= 0.3) && (bytte03==0)
+    f_low2(i+1)=1-sqrt(sum(i));
+    if (f_low2(i) <= 0.3) && (bytte03==0)
         C_i_T2=Ci_eq(v.T_2);
         D_T2=D_eq(v.T_2);
-        k_e=k_eq(C_i_T2);
-        t1star=t1star_eq(k_e,D_T2);
+        k=k_eq(C_i_T2);
+        t1star=t1star_eq(k,D_T2);
         tid_low03 = i;
         bytte03=1;
     end
@@ -353,35 +353,36 @@ tid2=i;
 
 figure(3)
 subplot(3,1,2)
-plot(t(1:tid1), f_low11,'r', t(1:tid2), f_low12,'r')
+plot(t(1:tid1), f_low1,'r', t(1:tid2), f_low2,'r')
 % hold on
 % plot
 legend('Numeric solution','','Isokinetic solution','')
 
 %dissolution
 D_1=D_eq(v.T_2);
+C_i_T2=Ci_eq(v.T_2);
 k=k_eq(C_i_T2);
-t1star_eq=@(k,D) (pi*c.B0^2)/(D*k^2);
+
 t1star=t1star_eq(k,D_1);
 i=1;
 dt=0.0005;
 t=[0:dt:20];
 
-f_low11=1;
-f_low12=1;
+f_hi1=1;
+f_hi2=1;
 bytte07=0;
 bytte03=0;
 sum=0;
 
-while f_low11(i) > 0 
+while f_hi1(i) > 0 
     
     sum(i+1)=sum(i)+(dt/t1star);
-    f_low11(i+1)=1-sqrt(sum(i));
-    if (f_low11(i) <= 0.7) && (bytte07==0)
-        C_i_T2=Ci_eq(v.T_1);
-        D_T2=D_eq(v.T_1);
-        k=k_eq(C_i_T2);
-        t1star=t1star_eq(k,D_T2);
+    f_hi1(i+1)=1-sqrt(sum(i));
+    if (f_hi1(i) <= 0.7) && (bytte07==0)
+        C_i_T1=Ci_eq(v.T_1);
+        D_T1=D_eq(v.T_1);
+        k=k_eq(C_i_T1);
+        t1star=t1star_eq(k,D_T1);
         tid_low07 = i;
         bytte07=1;
     end
@@ -398,15 +399,15 @@ t1star=t1star_eq(k,D_T2);
 i=1;
 
 sum=0;
-while f_low12 > 0
+while f_hi2 > 0
 
     sum(i+1)=sum(i)+(dt/t1star);
-    f_low12(i+1)=1-sqrt(sum(i));
-    if (f_low12(i) <= 0.3) && (bytte03==0)
+    f_hi2(i+1)=1-sqrt(sum(i));
+    if (f_hi2(i) <= 0.3) && (bytte03==0)
         C_i_T1=Ci_eq(v.T_1);
         D_T1=D_eq(v.T_1);
-        k_e=k_eq(C_i_T1);
-        t1star=t1star_eq(k_e,D_T1);
+        k=k_eq(C_i_T1);
+        t1star=t1star_eq(k,D_T1);
         tid_low03 = i;
         bytte03=1;
     end
@@ -416,8 +417,12 @@ end
 tid2=i;
 
 
+
 figure(3)
 subplot(3,1,3)
-plot(t(1:tid1), f_low11,'r', t(1:tid2), f_low12,'r')
+plot(t(1:tid1), f_hi1,'r', t(1:tid2), f_hi2,'r')
 
 legend('Numeric solution','','Isokinetic solution','')
+
+
+

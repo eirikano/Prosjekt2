@@ -231,9 +231,9 @@ while (r_num_noniso_1_norm(j)>0)||(r_num_noniso_2_norm(j)>0)
 end
 
 subplot(3,1,2)
-plot(t,r_num_noniso_1_norm)
+plot(t,r_num_noniso_1_norm,'b')
 hold on
-plot(t,r_num_noniso_2_norm)
+plot(t,r_num_noniso_2_norm,'b')
 axis([0 inf 0 1])
 title('d)Spherical dissolution, two-step, 3D')
 ylabel('scaled volume fraction')
@@ -314,9 +314,9 @@ while (r_num_noniso_1_norm(j)>0)||(r_num_noniso_2_norm(j)>0)
 end
 
 subplot(3,1,3)
-plot(t,r_num_noniso_1_norm)
+plot(t,r_num_noniso_1_norm, 'b')
 hold on
-plot(t,r_num_noniso_2_norm)
+plot(t,r_num_noniso_2_norm, 'b')
 axis([0 inf 0 1])
 title('d)Spherical dissolution, two-step, 3D')
 ylabel('scaled volume fraction')
@@ -324,3 +324,130 @@ xlabel('time[s]')
 grid
 
 
+
+%%
+D_1=D_eq(v.T_1);
+C_i_T1=Ci_eq(v.T_1);
+k=k_eq(C_i_T1);
+t2star_eq=@(k,D) c.B0^2/(D*k);
+
+t2star=t2star_eq(k,D_1);
+i=1;
+dt=0.0005;
+t=[0:dt:20];
+
+f_low1=1;
+f_low2=1;
+bytte07=0;
+bytte03=0;
+sum=0;
+
+while f_low1(i) > 0 
+    
+    sum(i+1)=sum(i)+(dt/t2star);
+    f_low1(i+1)=(1-sum(i))^(3/2);
+    if (f_low1(i) <= 0.7) && (bytte07==0)
+        C_i_T2=Ci_eq(v.T_2);
+        D_T2=D_eq(v.T_2);
+        k=k_eq(C_i_T2);
+        t2star=t2star_eq(k,D_T2);
+        tid_low07 = i;
+        bytte07=1;
+    end
+    i=i+1;
+end
+tid1=i;
+
+
+D_T1=D_eq(v.T_1);
+C_i_T1=Ci_eq(v.T_1);
+k=k_eq(C_i_T1);
+
+t2star=t2star_eq(k,D_T1);
+i=1;
+
+sum=0;
+while f_low2 > 0
+
+    sum(i+1)=sum(i)+(dt/t2star);
+    f_low2(i+1)=(1-sum(i))^(3/2);
+    if (f_low2(i) <= 0.3) && (bytte03==0)
+        C_i_T2=Ci_eq(v.T_2);
+        D_T2=D_eq(v.T_2);
+        k=k_eq(C_i_T2);
+        t2star=t2star_eq(k,D_T2);
+        tid_low03 = i;
+        bytte03=1;
+    end
+    i=i+1;
+    
+end
+tid2=i;
+
+
+figure(3)
+subplot(3,1,2)
+plot(t(1:tid1), f_low1,'r', t(1:tid2), f_low2,'r')
+legend('Numeric solution','','Isokinetic solution','')
+
+%dissolution
+D_2=D_eq(v.T_2);
+k=k_eq(C_i_T2);
+t2star=t2star_eq(k,D_2);
+i=1;
+
+
+f_hi1=1;
+f_hi2=1;
+bytte07=0;
+bytte03=0;
+sum=0;
+
+while f_hi1(i) > 0 
+    
+    sum(i+1)=sum(i)+(dt/t2star);
+    f_hi1(i+1)=(1-sum(i))^(3/2);
+    if (f_hi1(i) <= 0.7) && (bytte07==0)
+        C_i_T1=Ci_eq(v.T_1);
+        D_T1=D_eq(v.T_1);
+        k=k_eq(C_i_T1);
+        t2star=t2star_eq(k,D_T1);
+        tid_hi07 = i;
+        bytte07=1;
+    end
+    i=i+1;
+end
+tid1=i;
+
+
+D_T2=D_eq(v.T_2);
+C_i_T2=Ci_eq(v.T_2);
+k=k_eq(C_i_T2);
+
+t2star=t2star_eq(k,D_T2);
+i=1;
+
+sum=0;
+while f_hi2 > 0
+
+    sum(i+1)=sum(i)+(dt/t2star);
+    f_hi2(i+1)=(1-sum(i))^(3/2);
+    if (f_hi2(i) <= 0.3) && (bytte03==0)
+        C_i_T1=Ci_eq(v.T_1);
+        D_T1=D_eq(v.T_1);
+        k=k_eq(C_i_T1);
+        t2star=t2star_eq(k,D_T1);
+        tid_hi03 = i;
+        bytte03=1;
+    end
+    i=i+1;
+    
+end
+tid2=i;
+
+
+figure(3)
+subplot(3,1,3)
+plot(t(1:tid1), f_hi1,'r', t(1:tid2), f_hi2,'r')
+
+legend('Numeric solution','','Isokinetic solution','')
